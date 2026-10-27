@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Classroom Allotter — Day 1 Revision Notes</title>
+  <style>
+    @page { size: A4; margin: 16mm; }
+    * { box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; color: #172033; line-height: 1.38; font-size: 10.5pt; margin: 0; }
+    h1 { color: #173b68; font-size: 25pt; margin: 0 0 5px; }
+    h2 { color: #173b68; border-bottom: 2px solid #bdd1e7; padding-bottom: 4px; margin: 22px 0 9px; font-size: 16pt; }
+    h3 { color: #255583; margin: 14px 0 5px; font-size: 12pt; }
+    p { margin: 5px 0 8px; }
+    code { font-family: "Liberation Mono", monospace; background: #eef3f8; padding: 1px 4px; border-radius: 3px; }
+    pre { font-family: "Liberation Mono", monospace; background: #10243e; color: #f5f8fc; padding: 10px 12px; border-radius: 6px; font-size: 8.8pt; white-space: pre-wrap; }
+    table { width: 100%; border-collapse: collapse; margin: 8px 0 12px; }
+    th { background: #173b68; color: white; text-align: left; }
+    th, td { border: 1px solid #aab9c9; padding: 6px 7px; vertical-align: top; }
+    tr:nth-child(even) td { background: #f5f8fb; }
+    ul, ol { margin: 5px 0 9px 20px; padding: 0; }
+    li { margin: 3px 0; }
+    .subtitle { color: #52657b; font-size: 12pt; margin-bottom: 16px; }
+    .callout { background: #edf6ff; border-left: 5px solid #2d78b7; padding: 9px 12px; margin: 10px 0; }
+    .warning { background: #fff6df; border-left-color: #d39b21; }
+    .diagram { border: 1px solid #b8c8d8; background: #f8fbfe; padding: 12px; margin: 10px 0 14px; text-align: center; }
+    .box { display: inline-block; border: 2px solid #527ca5; border-radius: 6px; background: white; padding: 7px 10px; margin: 3px; min-width: 112px; }
+    .arrow { display: inline-block; color: #527ca5; font-weight: bold; font-size: 15pt; margin: 0 2px; }
+    .down { color: #527ca5; font-weight: bold; font-size: 15pt; line-height: 1; }
+    .small { font-size: 9pt; color: #516377; }
+    .page-break { page-break-before: always; }
+    .two-col { width: 100%; }
+    .two-col td { width: 50%; border: 0; background: white !important; padding: 4px 9px 4px 0; }
+  </style>
+</head>
+<body>
+  <h1>Classroom Allotter</h1>
+  <div class="subtitle">Day 1 revision notes · Backend foundations · 27 October 2026</div>
+
+  <div class="callout">
+    <strong>Project purpose:</strong> Help college class representatives find and coordinate rooms for rescheduled lectures, extra classes, and other activities. Eventually, availability will combine timetable data, CR activities, and recent empty-room reports without claiming uncertain information is guaranteed.
+  </div>
+
+  <h2>1. The mental model</h2>
+  <p>A backend server waits for requests, runs the matching route logic, and sends a response. Our server uses Node.js to run JavaScript and Express to define API routes.</p>
+
+  <div class="diagram">
+    <div class="box"><strong>Client</strong><br><span class="small">Browser or curl</span></div>
+    <span class="arrow">→</span>
+    <div class="box"><strong>HTTP Request</strong><br><span class="small">method + URL + data</span></div>
+    <span class="arrow">→</span>
+    <div class="box"><strong>Express Route</strong><br><span class="small">validation + logic</span></div>
+    <span class="arrow">→</span>
+    <div class="box"><strong>HTTP Response</strong><br><span class="small">status + JSON</span></div>
+  </div>
+
+  <div class="page-break"></div>
+  <table>
+    <tr><th>Term</th><th>Meaning</th></tr>
+    <tr><td>Client</td><td>A program that requests something, such as a browser or <code>curl</code>.</td></tr>
+    <tr><td>Server</td><td>A program that listens for requests and sends responses.</td></tr>
+    <tr><td>API</td><td>A defined way for software systems to communicate.</td></tr>
+    <tr><td>Endpoint</td><td>An HTTP method plus a path, such as <code>GET /api/rooms</code>.</td></tr>
+    <tr><td>JSON</td><td>A text format for structured data exchanged between client and server.</td></tr>
+    <tr><td>Middleware</td><td>Code that runs while a request travels through the server.</td></tr>
+  </table>
+
+  <h2>2. Project file map</h2>
+  <pre>classroom-allotter/
+├── src/server.js                  application entry point and routes
+├── scripts/draw_system_design.py  diagram-generation utility
+├── node_modules/                  installed third-party packages
+├── package.json                   project settings, scripts, dependencies
+├── package-lock.json              exact installed dependency versions
+├── .env.example                   safe environment-variable template
+├── .gitignore                     files Git should ignore
+├── README.md                      living project documentation
+└── classroom-allotter-system-design.png</pre>
+
+  <p><strong>Edit manually:</strong> source code, README, environment template, and project configuration when needed. <strong>Do not edit manually:</strong> <code>node_modules</code> or <code>package-lock.json</code>.</p>
+
+  <h2>3. How the current server starts</h2>
+  <div class="diagram">
+    <div class="box"><code>npm run dev</code></div><span class="arrow">→</span>
+    <div class="box">npm reads<br><code>package.json</code></div><span class="arrow">→</span>
+    <div class="box"><code>node --watch<br>src/server.js</code></div><span class="arrow">→</span>
+    <div class="box">Express listens<br>on port 3000</div>
+  </div>
+
+  <pre>npm install       # install dependencies
+npm run dev       # start development mode
+Ctrl+C            # stop the server</pre>
+
+  <div class="page-break"></div>
+  <h2>4. Routes and HTTP methods</h2>
+  <p>A route tells the backend: “When this HTTP method arrives at this path, run this handler.”</p>
+  <pre>app.get("/api/rooms", (request, response) =&gt; {
+  response.json({ count: rooms.length, rooms });
+});</pre>
+
+  <table>
+    <tr><th>Method</th><th>Purpose</th><th>Current example</th></tr>
+    <tr><td><code>GET</code></td><td>Retrieve data without changing it</td><td><code>GET /api/rooms</code></td></tr>
+    <tr><td><code>POST</code></td><td>Create a new resource</td><td><code>POST /api/rooms</code></td></tr>
+    <tr><td><code>PATCH</code></td><td>Partially update a resource</td><td>Later</td></tr>
+    <tr><td><code>DELETE</code></td><td>Remove a resource</td><td>Later</td></tr>
+  </table>
+
+  <h3>Current endpoints</h3>
+  <table>
+    <tr><th>Endpoint</th><th>Purpose</th></tr>
+    <tr><td><code>GET /api/health</code></td><td>Confirm that the API is running.</td></tr>
+    <tr><td><code>GET /api/rooms</code></td><td>Return every temporary room.</td></tr>
+    <tr><td><code>GET /api/rooms?minCapacity=50</code></td><td>Return rooms with at least 50 seats.</td></tr>
+    <tr><td><code>GET /api/rooms/:id</code></td><td>Return one room by ID.</td></tr>
+    <tr><td><code>POST /api/rooms</code></td><td>Validate JSON and create a temporary room.</td></tr>
+  </table>
+
+  <h2>5. Query parameters vs route parameters</h2>
+  <table>
+    <tr><th></th><th>Query parameter</th><th>Route parameter</th></tr>
+    <tr><td>Example</td><td><code>/api/rooms?minCapacity=50</code></td><td><code>/api/rooms/2</code></td></tr>
+    <tr><td>Question answered</td><td>How should a collection be filtered?</td><td>Which particular resource?</td></tr>
+    <tr><td>Express location</td><td><code>request.query.minCapacity</code></td><td><code>request.params.id</code></td></tr>
+    <tr><td>Initial type</td><td>String</td><td>String</td></tr>
+  </table>
+
+  <div class="callout warning">
+    Parameter names must match exactly. <code>minCapacity</code> works; <code>mincap</code> is a different name. URL input normally arrives as text and must be converted and validated.
+  </div>
+
+  <h2>6. Reading and filtering arrays</h2>
+  <table>
+    <tr><th>Method</th><th>What it does</th><th>Result when nothing matches</th></tr>
+    <tr><td><code>filter()</code></td><td>Returns all matching items</td><td>Empty array <code>[]</code></td></tr>
+    <tr><td><code>find()</code></td><td>Returns the first matching item</td><td><code>undefined</code></td></tr>
+    <tr><td><code>some()</code></td><td>Checks whether at least one item matches</td><td><code>false</code></td></tr>
+    <tr><td><code>map()</code></td><td>Transforms every item into a new array</td><td>Empty array <code>[]</code></td></tr>
+    <tr><td><code>push()</code></td><td>Adds an item to the end of an array</td><td>Mutates the original array</td></tr>
+  </table>
+
+  <div class="page-break"></div>
+  <h2>7. Creating a room with POST</h2>
+  <p><code>express.json()</code> parses an incoming JSON body and makes it available as <code>request.body</code>.</p>
+
+  <div class="diagram">
+    <div class="box">POST request<br>with JSON</div>
+    <div class="down">↓</div>
+    <div class="box"><code>express.json()</code><br><span class="small">parse body</span></div>
+    <div class="down">↓</div>
+    <div class="box">Validate code,<br>building, capacity,<br>facilities</div>
+    <div class="down">↓</div>
+    <div class="box">Normalize text<br>and check duplicate</div>
+    <div class="down">↓</div>
+    <div class="box"><code>rooms.push(newRoom)</code><br><strong>201 Created</strong></div>
+  </div>
+
+  <h3>Validation rules</h3>
+  <table>
+    <tr><th>Field</th><th>Rule</th><th>Example</th></tr>
+    <tr><td><code>code</code></td><td>Required, non-empty string; normalized to uppercase</td><td><code>"C-301"</code></td></tr>
+    <tr><td><code>building</code></td><td>Required, non-empty string</td><td><code>"Academic Block C"</code></td></tr>
+    <tr><td><code>capacity</code></td><td>Required, positive whole-number JSON value</td><td><code>80</code>, not <code>"80"</code></td></tr>
+    <tr><td><code>facilities</code></td><td>Optional array of non-empty strings</td><td><code>["projector"]</code></td></tr>
+  </table>
+
+  <h3>Why validate?</h3>
+  <ul>
+    <li>Clients can make mistakes or send hostile input.</li>
+    <li>Consistent data is easier to search and maintain.</li>
+    <li>Normalization prevents values such as <code>c-301</code> and <code>C-301</code> from becoming separate rooms.</li>
+    <li>Duplicate room codes return <code>409 Conflict</code>.</li>
+  </ul>
+
+  <h2>8. HTTP status codes learned</h2>
+  <table>
+    <tr><th>Status</th><th>Meaning</th><th>Current example</th></tr>
+    <tr><td><strong>200 OK</strong></td><td>A retrieval succeeded.</td><td>Get rooms or one existing room.</td></tr>
+    <tr><td><strong>201 Created</strong></td><td>A new resource was created.</td><td>Create a room successfully.</td></tr>
+    <tr><td><strong>400 Bad Request</strong></td><td>The client supplied invalid input.</td><td>Negative capacity or text ID.</td></tr>
+    <tr><td><strong>404 Not Found</strong></td><td>The requested valid resource does not exist.</td><td>Room ID 999.</td></tr>
+    <tr><td><strong>409 Conflict</strong></td><td>The request conflicts with existing data.</td><td>Duplicate room code.</td></tr>
+  </table>
+
+  <div class="callout">
+    <strong>400 vs 404:</strong> <code>/api/rooms/abc</code> is invalid input, so it returns 400. <code>/api/rooms/999</code> is a valid ID format but no such room exists, so it returns 404.
+  </div>
+
+  <div class="page-break"></div>
+  <h2>9. Manual practice</h2>
+  <h3>Read operations</h3>
+  <pre>curl http://localhost:3000/api/health
+curl http://localhost:3000/api/rooms
+curl "http://localhost:3000/api/rooms?minCapacity=50"
+curl http://localhost:3000/api/rooms/2
+curl -i http://localhost:3000/api/rooms/999</pre>
+
+  <h3>Create a room</h3>
+  <pre>curl -i -X POST http://localhost:3000/api/rooms \
+  -H "Content-Type: application/json" \
+  -d '{"code":"C-301","building":"Academic Block C","capacity":80,"facilities":["projector","whiteboard"]}'</pre>
+
+  <p>Run the POST twice to observe <code>409 Conflict</code>. Then restart the server and notice that the created room disappears.</p>
+
+  <h2>10. In-memory storage</h2>
+  <div class="diagram">
+    <div class="box">Hard-coded<br><code>rooms</code> array</div><span class="arrow">→</span>
+    <div class="box">Server memory</div><span class="arrow">→</span>
+    <div class="box">Server restart</div><span class="arrow">→</span>
+    <div class="box">Runtime changes<br>are lost</div>
+  </div>
+  <p>In-memory data is useful for learning API behavior without database complexity. It is not persistent. The next major block will replace it with MongoDB documents so room records survive restarts.</p>
+
+  <h2>11. Tomorrow's recall questions</h2>
+  <ol>
+    <li>What is a route, and what are its three main parts?</li>
+    <li>What is the difference between route parameters and query parameters?</li>
+    <li>Why does JSON capacity <code>80</code> work while <code>"80"</code> is rejected?</li>
+    <li>What does <code>express.json()</code> do?</li>
+    <li>What is the difference between <code>filter()</code> and <code>find()</code>?</li>
+    <li>When should an API return 400, 404, 409, and 201?</li>
+    <li>Why does a newly created room disappear after a restart?</li>
+    <li>Explain the flow: request → middleware → route → validation → logic → response.</li>
+  </ol>
+
+  <h2>12. Interview-ready summary</h2>
+  <div class="callout">
+    “I built an Express API with health and room endpoints. The rooms API supports collection retrieval, query filtering, lookup by route parameter, and JSON-based creation. I validate and normalize input, distinguish 400, 404, and 409 errors, and return 201 after creation. The current array is intentionally temporary; MongoDB is the next step for persistence.”
+  </div>
+
+  <p class="small">Next session: quick recall, then MongoDB concepts and persistent room storage. Final project delivery will include Vercel deployment.</p>
+</body>
+</html>
