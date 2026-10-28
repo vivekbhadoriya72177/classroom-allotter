@@ -142,4 +142,5 @@ Only add features when user feedback or implementation needs justify them. Possi
 - **2026-10-27:** Added `GET /api/rooms/:id` to teach route parameters and distinguish invalid IDs (`400`) from missing rooms (`404`).
 - **2026-10-27:** Added `POST /api/rooms` with JSON-body validation, normalized values, duplicate-code protection, and a `201 Created` response.
 - **2026-10-27:** Added Day 1 PDF revision notes covering the concepts and API behavior learned so far.
+- **2026-10-28:** Reconstructed the Day 1 PDF flowcharts with print-safe layouts so every box, arrow, and label appears completely on the page.
 

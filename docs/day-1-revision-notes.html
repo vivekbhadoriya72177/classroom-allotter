@@ -22,10 +22,16 @@
     .subtitle { color: #52657b; font-size: 12pt; margin-bottom: 16px; }
     .callout { background: #edf6ff; border-left: 5px solid #2d78b7; padding: 9px 12px; margin: 10px 0; }
     .warning { background: #fff6df; border-left-color: #d39b21; }
-    .diagram { border: 1px solid #b8c8d8; background: #f8fbfe; padding: 12px; margin: 10px 0 14px; text-align: center; }
-    .box { display: inline-block; border: 2px solid #527ca5; border-radius: 6px; background: white; padding: 7px 10px; margin: 3px; min-width: 112px; }
-    .arrow { display: inline-block; color: #527ca5; font-weight: bold; font-size: 15pt; margin: 0 2px; }
-    .down { color: #527ca5; font-weight: bold; font-size: 15pt; line-height: 1; }
+    .diagram { border: 1px solid #b8c8d8; background: #f8fbfe; padding: 10px; margin: 10px 0 14px; page-break-inside: avoid; }
+    .flow { width: 100%; border-collapse: separate; border-spacing: 5px; margin: 0; page-break-inside: avoid; }
+    .flow td { background: transparent !important; border: 0; padding: 3px; text-align: center; vertical-align: middle; }
+    .flow td.node { border: 2px solid #527ca5; background: white !important; padding: 9px 7px; }
+    .flow td.arrow { width: 5%; color: #255f94; font-size: 17pt; font-weight: bold; padding: 2px; }
+    .node { border: 2px solid #527ca5 !important; background-color: white !important; padding: 9px 7px !important; }
+    .arrow { border: 0 !important; color: #255f94; font-weight: bold; }
+    .flow-vertical { width: 68%; margin: 0 auto; }
+    .flow-vertical td.node { padding: 8px 12px; }
+    .flow-vertical td.arrow { height: 22px; width: auto; line-height: 1; }
     .small { font-size: 9pt; color: #516377; }
     .page-break { page-break-before: always; }
     .two-col { width: 100%; }
@@ -44,13 +50,17 @@
   <p>A backend server waits for requests, runs the matching route logic, and sends a response. Our server uses Node.js to run JavaScript and Express to define API routes.</p>
 
   <div class="diagram">
-    <div class="box"><strong>Client</strong><br><span class="small">Browser or curl</span></div>
-    <span class="arrow">→</span>
-    <div class="box"><strong>HTTP Request</strong><br><span class="small">method + URL + data</span></div>
-    <span class="arrow">→</span>
-    <div class="box"><strong>Express Route</strong><br><span class="small">validation + logic</span></div>
-    <span class="arrow">→</span>
-    <div class="box"><strong>HTTP Response</strong><br><span class="small">status + JSON</span></div>
+    <table class="flow">
+      <tr>
+        <td class="node"><strong>Client</strong><br><span class="small">Browser or curl</span></td>
+        <td class="arrow">→</td>
+        <td class="node"><strong>HTTP Request</strong><br><span class="small">method + URL + data</span></td>
+        <td class="arrow">→</td>
+        <td class="node"><strong>Express Route</strong><br><span class="small">validation + logic</span></td>
+        <td class="arrow">→</td>
+        <td class="node"><strong>HTTP Response</strong><br><span class="small">status + JSON</span></td>
+      </tr>
+    </table>
   </div>
 
   <div class="page-break"></div>
@@ -80,10 +90,17 @@
 
   <h2>3. How the current server starts</h2>
   <div class="diagram">
-    <div class="box"><code>npm run dev</code></div><span class="arrow">→</span>
-    <div class="box">npm reads<br><code>package.json</code></div><span class="arrow">→</span>
-    <div class="box"><code>node --watch<br>src/server.js</code></div><span class="arrow">→</span>
-    <div class="box">Express listens<br>on port 3000</div>
+    <table class="flow">
+      <tr>
+        <td class="node"><code>npm run dev</code></td>
+        <td class="arrow">→</td>
+        <td class="node">npm reads<br><code>package.json</code></td>
+        <td class="arrow">→</td>
+        <td class="node"><code>node --watch<br>src/server.js</code></td>
+        <td class="arrow">→</td>
+        <td class="node">Express listens<br>on port 3000</td>
+      </tr>
+    </table>
   </div>
 
   <pre>npm install       # install dependencies
@@ -139,19 +156,21 @@ Ctrl+C            # stop the server</pre>
   </table>
 
   <div class="page-break"></div>
-  <h2>7. Creating a room with POST</h2>
+  <h2 class="page-break">7. Creating a room with POST</h2>
   <p><code>express.json()</code> parses an incoming JSON body and makes it available as <code>request.body</code>.</p>
 
   <div class="diagram">
-    <div class="box">POST request<br>with JSON</div>
-    <div class="down">↓</div>
-    <div class="box"><code>express.json()</code><br><span class="small">parse body</span></div>
-    <div class="down">↓</div>
-    <div class="box">Validate code,<br>building, capacity,<br>facilities</div>
-    <div class="down">↓</div>
-    <div class="box">Normalize text<br>and check duplicate</div>
-    <div class="down">↓</div>
-    <div class="box"><code>rooms.push(newRoom)</code><br><strong>201 Created</strong></div>
+    <table class="flow flow-vertical">
+      <tr><td class="node"><strong>1. POST request</strong><br><span class="small">JSON room data</span></td></tr>
+      <tr><td class="arrow">↓</td></tr>
+      <tr><td class="node"><strong>2. Parse body</strong><br><code>express.json()</code></td></tr>
+      <tr><td class="arrow">↓</td></tr>
+      <tr><td class="node"><strong>3. Validate fields</strong><br><span class="small">code · building · capacity · facilities</span></td></tr>
+      <tr><td class="arrow">↓</td></tr>
+      <tr><td class="node"><strong>4. Normalize and check</strong><br><span class="small">clean text · reject duplicate code</span></td></tr>
+      <tr><td class="arrow">↓</td></tr>
+      <tr><td class="node"><strong>5. Store and respond</strong><br><code>rooms.push(newRoom)</code> · <strong>201 Created</strong></td></tr>
+    </table>
   </div>
 
   <h3>Validation rules</h3>
@@ -203,10 +222,17 @@ curl -i http://localhost:3000/api/rooms/999</pre>
 
   <h2>10. In-memory storage</h2>
   <div class="diagram">
-    <div class="box">Hard-coded<br><code>rooms</code> array</div><span class="arrow">→</span>
-    <div class="box">Server memory</div><span class="arrow">→</span>
-    <div class="box">Server restart</div><span class="arrow">→</span>
-    <div class="box">Runtime changes<br>are lost</div>
+    <table class="flow">
+      <tr>
+        <td class="node">Hard-coded<br><code>rooms</code> array</td>
+        <td class="arrow">→</td>
+        <td class="node">Stored in<br>server memory</td>
+        <td class="arrow">→</td>
+        <td class="node">Server<br>restarts</td>
+        <td class="arrow">→</td>
+        <td class="node">Runtime changes<br>are lost</td>
+      </tr>
+    </table>
   </div>
   <p>In-memory data is useful for learning API behavior without database complexity. It is not persistent. The next major block will replace it with MongoDB documents so room records survive restarts.</p>
 
