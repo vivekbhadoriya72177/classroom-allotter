@@ -1,0 +1,8 @@
+.env
+.env.local
+.git
+.git-local
+.vercel
+node_modules
+docs
+*.pdf

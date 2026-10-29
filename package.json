@@ -7,10 +7,15 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "node --watch src/server.js",
-    "start": "node src/server.js"
+    "db:inspect": "node --env-file=.env scripts/inspect-database.js",
+    "db:migrate:mvp": "node --env-file=.env scripts/run-sql-file.js db/migrations/002_mvp_features.sql",
+    "db:seed": "node --env-file=.env scripts/run-sql-file.js db/seed.sql",
+    "check": "node --check src/server.js && node --check public/app.js",
+    "dev": "node --env-file-if-exists=.env --watch src/server.js",
+    "start": "node --env-file-if-exists=.env src/server.js"
   },
   "dependencies": {
-    "express": "^5.3.0"
+    "express": "^5.3.0",
+    "pg": "^8.23.1"
   }
 }

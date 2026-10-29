@@ -1,146 +1,222 @@
 # Classroom Allotter
 
-**Last updated:** 2026-10-27  
-**Status:** Block 1 complete; Block 2 started with an in-memory rooms endpoint
+A full-stack campus coordination MVP for finding timetable-free classrooms, recording extra activities, and sharing fresh empty-room observations.
 
-## Goal
+**Status:** deployable MVP completed on 2026-10-29
+**Stack:** Node.js, Express, PostgreSQL (Neon), HTML, CSS, JavaScript, Vercel
 
-Help class representatives (CRs) find and coordinate classrooms for rescheduled lectures, extra classes, and other activities. Room availability is difficult to confirm when timetable information is spread across courses and room occupancy changes during the day.
+**Live demo:** [https://classroom-allotter.vercel.app](https://classroom-allotter.vercel.app)
 
-## Core workflow
+## Why this project exists
 
-1. A CR enters the date, start time, duration, class size, and any room requirements.
-2. The site checks the college timetable and lists rooms without a scheduled class during that interval.
-3. Students can report that a room appears empty, with the room number, observation time, and an optional photo.
-4. A CR can mark a room as taken for a rescheduled lecture, extra class, or another activity, including its time range.
-5. The site shows the source and freshness of each status so users can judge whether the information is current.
+Class representatives often need a room for a rescheduled lecture, doubt session, or extra class, but availability is spread across timetables and word-of-mouth updates. Classroom Allotter combines three signals without confusing them:
 
-## Status rules
+1. **Timetable status** — whether a regular class overlaps the requested interval.
+2. **CR activity** — whether someone has already reserved that room for another activity.
+3. **Empty-room report** — a time-stamped student observation that expires after 30 minutes.
 
-Keep these sources distinct:
+An observation improves confidence, but it never overrides a timetable entry or active booking.
 
-- **Timetable status:** scheduled free or scheduled busy according to timetable data.
-- **Empty-room report:** a time-stamped observation; it expires so an old report is not treated as current.
-- **CR activity:** a room is reserved or in use for an activity during a stated time range. It clears at the end time and can be released early.
+## Working features
 
-Availability is checked for the full requested interval, not just at one instant. Room activity must not silently overwrite timetable entries.
+- Search rooms by date, full time interval, minimum capacity, building, and facility.
+- Reject a room if any timetable entry or active activity overlaps the requested interval.
+- Show recent empty-room observations separately from verified timetable availability.
+- Record rescheduled lectures, extra classes, study sessions, and other activities.
+- Prevent concurrent double-booking by locking the room row during the conflict check and insert transaction.
+- Release an active room reservation early and retain activity history.
+- Submit an empty-room observation with a reporter, note, and optional photo URL.
+- Persist all rooms, facilities, timetable entries, reports, and activities in PostgreSQL.
+- Serve a responsive browser interface and JSON API from one Express application.
+- Run locally as a normal Node server and deploy to Vercel as one Express Function.
 
-## First version (MVP)
+## Architecture
 
-- Start with one building or department and sample or manually uploaded timetable data.
-- Let a CR search by date, time, duration, class size, and basic room requirements.
-- Show rooms that are timetable-free and indicate recent empty-room reports separately.
-- Let students submit an empty-room report with an optional evidence photo.
-- Let authorized CRs record and release an activity.
-- Include basic input validation, useful error messages, and a simple activity history.
-
-Photo uploads should avoid identifiable people. Store image files separately from the main MongoDB room and report documents; keep the file reference and metadata in MongoDB.
-
-## Technology
-
-- **Backend:** Node.js (LTS), Express.js, MongoDB
-- **Frontend:** HTML, CSS, and JavaScript for the first simple website
-- **Version control:** Git
-
-## System design
-
-See `classroom-allotter-system-design.png` for the system diagram. The source used to draw it is `scripts/draw_system_design.py`.
-
-The first version is one Express application organized into routes, validation, and service modules. The browser sends requests to the API. The API uses MongoDB for room, timetable, report, activity, and user records. Photo files are stored separately, with their references kept in MongoDB. A small scheduled process will expire old empty-room reports and completed activities.
-
-The diagram is a target architecture, not a claim that every block is already implemented. We will add the blocks in sequence and update this section as each decision changes.
-
-## Learning and build order
-
-Learn the backend through a small working slice, then connect the frontend. Build and explain each block before moving on:
-
-1. JavaScript essentials for Node.js: modules, async/await, promises, and errors.
-2. HTTP and Express: routes, middleware, request/response, and status codes.
-3. MongoDB: documents, CRUD operations, modeling, and indexes.
-4. Build the room/timetable availability endpoint.
-5. Add empty-room reports and CR activity updates.
-6. Add a simple frontend and connect it to the API.
-7. Add expiry handling, tests, documentation, and deploy the finished MVP on Vercel.
-
-### Block progress
-
-- **Block 1 — Express API shell:** complete. `GET /api/health` confirms that the API is running.
-- **Block 2 — Room and timetable data:** in progress. The API can list, filter, retrieve, and create validated temporary in-memory rooms; MongoDB persistence and timetable data are next.
-- **Block 3 — Availability search:** find rooms free for the full requested interval.
-- **Block 4 — Empty-room reports:** accept an observation and optional photo reference, with an expiry time.
-- **Block 5 — CR activity updates:** mark a room taken for an activity and release it early or at its end time.
-- **Block 6 — Browser interface:** search, report, and update room status.
-- **Block 7 — Reliability and delivery:** authorization, validation, history, tests, and Vercel deployment.
-
-## Initial data concepts
-
-- **Room:** building, room number, capacity, facilities.
-- **Timetable entry:** course, room, start/end time, recurrence or date.
-- **Empty-room report:** room, reporter, observed time, optional image reference, expiry.
-- **Room activity:** room, CR, activity type, start/end time, status.
-- **User:** identity, role (student, CR, or administrator).
-
-The exact fields and permissions will be refined while implementing the MVP.
-
-## Start the current code
-
-From the project directory, run:
-
-```bash
-npm install
-npm run dev
+```text
+Browser (HTML/CSS/JS)
+        │
+        │ fetch JSON
+        ▼
+Express application
+  ├── validation
+  ├── room routes
+  ├── availability route
+  ├── report route
+  └── activity routes + transaction
+        │
+        │ parameterized SQL
+        ▼
+Neon PostgreSQL
+  ├── rooms + facilities
+  ├── weekly timetable
+  ├── expiring observations
+  └── activity history
 ```
 
-Then manually check these endpoints:
+The source diagram is also available as `classroom-allotter-system-design.png` and can be regenerated with `scripts/draw_system_design.py`.
 
-- `http://localhost:3000/api/health` returns JSON containing `ok: true`.
-- `http://localhost:3000/api/rooms` returns three temporary sample rooms and `count: 3`.
-- `http://localhost:3000/api/rooms?minCapacity=50` returns only rooms with at least 50 seats.
-- `http://localhost:3000/api/rooms?minCapacity=abc` returns HTTP status `400` and a validation error.
-- `http://localhost:3000/api/rooms/2` returns room A-204.
-- `http://localhost:3000/api/rooms/999` returns HTTP status `404` because the room does not exist.
+## Availability rule
 
-Create a temporary room with a JSON request:
+For a requested interval `[start, end)`, a room is returned only when:
 
-```bash
-curl -i -X POST http://localhost:3000/api/rooms \
-  -H "Content-Type: application/json" \
-  -d '{"code":"C-301","building":"Academic Block C","capacity":80,"facilities":["projector","whiteboard"]}'
+```text
+capacity is sufficient
+AND requested building/facility filters match
+AND no timetable entry starts before end and ends after start
+AND no active CR activity starts before end and ends after start
 ```
 
-The response has HTTP status `201` and contains the created room. Reusing the same room code returns `409`. Because rooms are still stored in memory, the newly created room disappears when the server restarts.
+Using a half-open interval means one activity may begin exactly when another ends without being treated as an overlap.
 
-The room records currently live in server memory, so they are recreated whenever the server starts. MongoDB persistence is a later step in Block 2.
+## Data model
 
-## Current API routes
+| Table | Purpose |
+|---|---|
+| `rooms` | Room code, building, capacity, and creation time. |
+| `facilities` | Normalized facility names such as `projector`. |
+| `room_facilities` | Many-to-many relationship between rooms and facilities. |
+| `timetable_entries` | Weekly course schedule by room, weekday, start time, and end time. |
+| `empty_room_reports` | Expiring observations with optional note and photo URL. |
+| `room_activities` | Time-bounded CR activities with active/released state. |
+
+Foreign keys, unique constraints, check constraints, indexes, parameterized SQL, and transactions protect database integrity.
+
+## API
 
 | Method | Route | Purpose |
 |---|---|---|
-| `GET` | `/api/health` | Confirm that the API server is running. |
-| `GET` | `/api/rooms` | Return temporary room records; optionally filter with a positive whole-number `minCapacity` query parameter. |
-| `POST` | `/api/rooms` | Validate a JSON request body and create a temporary room; duplicate room codes return `409`. |
-| `GET` | `/api/rooms/:id` | Return one room by its positive whole-number ID, or `404` if it does not exist. |
+| `GET` | `/api/health` | Check Express and PostgreSQL connectivity. |
+| `GET` | `/api/overview` | Return dashboard totals. |
+| `GET` | `/api/rooms` | List rooms; accepts optional `minCapacity`. |
+| `POST` | `/api/rooms` | Create a room and its facility relationships. |
+| `GET` | `/api/rooms/:id` | Return one room by ID. |
+| `GET` | `/api/availability` | Find rooms free for `start` through `end`; accepts capacity, building, and facility filters. |
+| `GET` | `/api/activities` | Return recent activity history. |
+| `POST` | `/api/activities` | Reserve a conflict-free room interval. |
+| `PATCH` | `/api/activities/:id/release` | Release an active reservation early. |
+| `POST` | `/api/reports` | Create a 30-minute empty-room observation. |
 
-## Later ideas to evaluate
+Validation errors return `400`, missing records return `404`, timetable or activity conflicts return `409`, database health failures return `503`, and unexpected server errors return `500`.
 
-Only add features when user feedback or implementation needs justify them. Possible extensions include timetable import, facility filters, notifications, admin approval, report trust signals, and usage analytics.
+## Project structure
 
-## Learning notes
+```text
+classroom-allotter/
+├── db/
+│   ├── migrations/002_mvp_features.sql
+│   ├── schema.sql
+│   └── seed.sql
+├── public/
+│   ├── app.js
+│   ├── favicon.svg
+│   ├── index.html
+│   └── styles.css
+├── scripts/
+│   ├── inspect-database.js
+│   ├── run-sql-file.js
+│   └── draw_system_design.py
+├── src/
+│   ├── lib/validation.js
+│   ├── routes/
+│   │   ├── activities.js
+│   │   ├── availability.js
+│   │   ├── overview.js
+│   │   ├── reports.js
+│   │   └── rooms.js
+│   ├── app.js
+│   ├── db.js
+│   └── server.js
+├── .env.example
+├── DEPLOYMENT.md
+├── LEARNING_LOG.md
+├── package.json
+└── vercel.json
+```
 
-- `LEARNING_LOG.md` counts active learning/build days and records what was learned, built, and planned next.
-- `docs/day-1-revision-notes.pdf` summarizes the backend concepts and room API work completed in the first session, with diagrams, flowcharts, practice commands, and recall questions.
-- `docs/day-1-revision-notes.html` is the editable source used to generate that PDF.
+## Run locally
 
-## Project log
+Requirements: Node.js 22 or newer and a PostgreSQL database.
 
-- **2026-10-27:** Chose the Classroom Allotter idea. Added timetable-based availability, student empty-room reports with optional photo evidence, and CR updates for rooms taken by rescheduled lectures, extra classes, or other activities. Chose Node.js, Express.js, and MongoDB. Agreed to keep this README updated as the project changes.
-- **2026-10-27:** Added the system-design diagram and implementation sequence. Started Block 1 with a minimal Express API and a health route.
-- **2026-10-27:** Drew the system-design image and added Block 1 source: Node.js/Express server, JSON middleware, and `GET /api/health`.
-- **2026-10-27:** Confirmed that the completed MVP will be deployed on Vercel after the local features are built and understood.
-- **2026-10-27:** Started Block 2 with `GET /api/rooms`, using three in-memory room records to teach API collections before adding MongoDB.
-- **2026-10-27:** Added `minCapacity` filtering and validation to `GET /api/rooms`, including an HTTP `400` response for invalid input.
-- **2026-10-27:** Added `GET /api/rooms/:id` to teach route parameters and distinguish invalid IDs (`400`) from missing rooms (`404`).
-- **2026-10-27:** Added `POST /api/rooms` with JSON-body validation, normalized values, duplicate-code protection, and a `201 Created` response.
-- **2026-10-27:** Added Day 1 PDF revision notes covering the concepts and API behavior learned so far.
-- **2026-10-28:** Reconstructed the Day 1 PDF flowcharts with print-safe layouts so every box, arrow, and label appears completely on the page.
+```bash
+npm install
+cp .env.example .env
+```
 
+Put a pooled PostgreSQL connection string in `.env` as `DATABASE_URL`. Never commit that file.
+
+For a completely new database, apply `db/schema.sql` and then run:
+
+```bash
+npm run db:seed
+```
+
+For the original learning database that already has the room/facility tables, run:
+
+```bash
+npm run db:migrate:mvp
+npm run db:seed
+```
+
+Start the application:
+
+```bash
+npm run dev
+```
+
+Open `http://localhost:3000`. Useful commands:
+
+```bash
+npm run check       # JavaScript syntax checks
+npm run db:inspect  # Read-only terminal tables for all important records
+npm start           # Production-style local start
+```
+
+## Deployment
+
+The repository is prepared for Vercel zero-configuration Express deployment:
+
+- `src/server.js` default-exports the Express app for Vercel and only opens a port locally.
+- `public/` contains CDN-served browser assets.
+- `vercel.json` places server compute in Singapore (`sin1`), close to the current Neon database.
+- `.vercelignore` explicitly excludes local secrets, Git metadata, dependencies, and learning PDFs from uploads.
+- `DATABASE_URL` is supplied through Vercel environment variables, never source control.
+
+Follow [DEPLOYMENT.md](DEPLOYMENT.md) for the exact dashboard and CLI steps plus post-deployment checks.
+
+The production deployment was verified on 2026-10-29 at `https://classroom-allotter.vercel.app`.
+
+## Verification completed
+
+The MVP was manually exercised against the live Neon development database:
+
+- Health, dashboard, room list, and frontend returned successful responses.
+- Capacity and interval availability filters returned the expected rooms.
+- A current timetable overlap returned HTTP `409`.
+- A second overlapping CR activity returned HTTP `409`.
+- Empty-room report creation, activity creation, history, and early release succeeded.
+- `npm audit --omit=dev` reported zero known vulnerabilities.
+
+## Current MVP boundaries
+
+This is an honest interview MVP, not a production university rollout:
+
+- Names are demo identity fields; institutional authentication and role authorization are not yet implemented.
+- The UI accepts an optional hosted photo URL; direct image upload needs object storage and moderation.
+- Timetable data is seeded SQL; an administrator CSV import flow is a future feature.
+- Campus timetable interpretation is fixed to `Asia/Kolkata` and searches are limited to one campus day.
+- Automated integration tests should be added before production adoption; current verification is manual plus syntax and dependency checks.
+
+These are useful interview discussion points because they show a deliberate MVP boundary and a clear production roadmap.
+
+## Resume-ready description
+
+**Classroom Allotter — Full-stack scheduling MVP**
+
+- Built a responsive room-discovery and coordination application using Node.js, Express, PostgreSQL, and vanilla JavaScript.
+- Designed timetable-aware interval queries and transaction-based conflict prevention to stop overlapping classroom reservations.
+- Modeled normalized room/facility relationships, expiring crowd reports, weekly timetable entries, and activity history with PostgreSQL constraints and indexes.
+- Deployed a single full-stack Express application with Neon PostgreSQL on Vercel-ready infrastructure.
+
+## Learning record
+
+`LEARNING_LOG.md` tracks each active learning/build day. `docs/day-1-revision-notes.pdf` contains the first backend revision guide with diagrams and recall questions.

@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Find timetable-free classrooms, coordinate extra classes, and share fresh room observations."
+    />
+    <meta name="theme-color" content="#10231d" />
+    <title>Classroom Allotter — Find a room without the runaround</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="/app.js" type="module"></script>
+  </head>
+  <body>
+    <div class="page-glow page-glow-one"></div>
+    <div class="page-glow page-glow-two"></div>
+
+    <header class="site-header shell">
+      <a class="brand" href="#top" aria-label="Classroom Allotter home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 42 42" role="img">
+            <path d="M8 11.5 21 5l13 6.5v19L21 37 8 30.5z" />
+            <path d="M14 17h14M14 22h9M14 27h12" />
+          </svg>
+        </span>
+        <span>Classroom <strong>Allotter</strong></span>
+      </a>
+      <nav aria-label="Primary navigation">
+        <a href="#find-room">Find a room</a>
+        <a href="#coordinate">Coordinate</a>
+        <a href="#activity">Activity</a>
+      </nav>
+      <span class="system-status" id="system-status">
+        <span class="status-dot"></span>
+        Checking system
+      </span>
+    </header>
+
+    <main id="top">
+      <section class="hero shell">
+        <div class="hero-copy">
+          <p class="eyebrow"><span></span> Built for campus coordination</p>
+          <h1>Find a free classroom.<br /><em>Skip the runaround.</em></h1>
+          <p class="hero-intro">
+            Search the timetable, avoid booking conflicts, and use fresh student
+            observations to make a confident room choice.
+          </p>
+          <a class="primary-link" href="#find-room">
+            Check availability
+            <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+        <div class="hero-visual" aria-label="How room status is verified">
+          <div class="visual-card visual-card-main">
+            <div class="visual-card-top">
+              <span class="mini-label">Room signal</span>
+              <span class="signal-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+            </div>
+            <span class="room-number">A–204</span>
+            <div class="availability-line">
+              <span class="availability-icon">✓</span>
+              <div><strong>Available</strong><small>for the full interval</small></div>
+            </div>
+            <div class="source-list">
+              <span><i class="source-dot source-green"></i>Timetable free</span>
+              <span><i class="source-dot source-lime"></i>Reported empty 8m ago</span>
+            </div>
+          </div>
+          <div class="orbit orbit-one"></div>
+          <div class="orbit orbit-two"></div>
+          <span class="floating-chip chip-one">60 seats</span>
+          <span class="floating-chip chip-two">Projector</span>
+        </div>
+      </section>
+
+      <section class="stats-strip shell" aria-label="Current campus overview">
+        <article><strong id="total-rooms">—</strong><span>rooms mapped</span></article>
+        <article><strong id="rooms-in-use">—</strong><span>in use now</span></article>
+        <article><strong id="recent-reports">—</strong><span>fresh reports</span></article>
+        <div class="trust-note">
+          <span>Three signals</span>
+          <small>Timetable · CR bookings · observations</small>
+        </div>
+      </section>
+
+      <section class="workspace shell" id="find-room">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow"><span></span> Availability search</p>
+            <h2>A room that fits your plan</h2>
+          </div>
+          <p>We check the complete interval, not just the starting minute.</p>
+        </div>
+
+        <form class="search-card" id="search-form">
+          <label>
+            <span>Date</span>
+            <input id="search-date" name="date" type="date" required />
+          </label>
+          <label>
+            <span>From</span>
+            <input id="search-start" name="startTime" type="time" required />
+          </label>
+          <label>
+            <span>Until</span>
+            <input id="search-end" name="endTime" type="time" required />
+          </label>
+          <label>
+            <span>Minimum seats</span>
+            <input name="minCapacity" type="number" min="1" value="30" required />
+          </label>
+          <label>
+            <span>Building</span>
+            <select id="building-filter" name="building">
+              <option value="">Any building</option>
+            </select>
+          </label>
+          <label>
+            <span>Must have</span>
+            <select name="facility">
+              <option value="">Any facilities</option>
+              <option value="projector">Projector</option>
+              <option value="smart-board">Smart board</option>
+              <option value="whiteboard">Whiteboard</option>
+            </select>
+          </label>
+          <button class="search-button" type="submit">
+            <span>Search rooms</span><span aria-hidden="true">→</span>
+          </button>
+        </form>
+
+        <div class="results-header">
+          <div>
+            <span class="results-count" id="results-count">Ready to search</span>
+            <span class="results-window" id="results-window">Choose a date and interval above</span>
+          </div>
+          <div class="legend">
+            <span><i class="source-dot source-green"></i>Timetable verified</span>
+            <span><i class="source-dot source-lime"></i>Fresh observation</span>
+          </div>
+        </div>
+        <div class="room-grid" id="room-results">
+          <div class="empty-state">
+            <span class="empty-icon">⌁</span>
+            <h3>Your free rooms will appear here</h3>
+            <p>Set the interval and capacity, then run your first search.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="coordinate-section" id="coordinate">
+        <div class="shell">
+          <div class="section-heading light-heading">
+            <div>
+              <p class="eyebrow"><span></span> Community coordination</p>
+              <h2>Keep the signal accurate</h2>
+            </div>
+            <p>Reserve a room for an activity or report what you can see right now.</p>
+          </div>
+
+          <div class="action-grid">
+            <form class="action-card" id="booking-form">
+              <div class="action-title">
+                <span class="action-number">01</span>
+                <div><h3>Record an activity</h3><p>For CRs coordinating an extra or shifted class.</p></div>
+              </div>
+              <div class="form-grid">
+                <label class="wide"><span>Room</span><select name="roomId" class="room-select" required></select></label>
+                <label><span>Activity</span>
+                  <select name="activityType" required>
+                    <option value="rescheduled-lecture">Rescheduled lecture</option>
+                    <option value="extra-class">Extra class</option>
+                    <option value="study-session">Study session</option>
+                    <option value="other">Other</option>
+                  </select>
+                </label>
+                <label><span>Organizer</span><input name="organizerName" maxlength="100" placeholder="Your name" required /></label>
+                <label class="wide"><span>Title</span><input name="title" maxlength="120" placeholder="e.g. DBMS doubt session" required /></label>
+                <label><span>Starts</span><input name="start" type="datetime-local" required /></label>
+                <label><span>Ends</span><input name="end" type="datetime-local" required /></label>
+              </div>
+              <p class="form-note">The server rechecks timetable and activity conflicts before saving.</p>
+              <button class="action-button" type="submit">Reserve interval <span>→</span></button>
+            </form>
+
+            <form class="action-card report-card" id="report-form">
+              <div class="action-title">
+                <span class="action-number">02</span>
+                <div><h3>Report an empty room</h3><p>A fresh observation helps others decide with confidence.</p></div>
+              </div>
+              <div class="form-grid single-column">
+                <label><span>Room</span><select name="roomId" class="room-select" required></select></label>
+                <label><span>Your name</span><input name="reporterName" maxlength="100" placeholder="Who observed it?" required /></label>
+                <label><span>Optional note</span><textarea name="note" maxlength="300" rows="3" placeholder="Lights off, no class in progress…"></textarea></label>
+                <label><span>Optional photo URL</span><input name="photoUrl" type="url" placeholder="https://…" /></label>
+              </div>
+              <p class="form-note">Reports expire after 30 minutes and never overwrite the timetable.</p>
+              <button class="action-button light-button" type="submit">Share observation <span>→</span></button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section class="activity-section shell" id="activity">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow"><span></span> Activity history</p>
+            <h2>What the campus coordinated</h2>
+          </div>
+          <button class="text-button" id="refresh-activity" type="button">Refresh ↻</button>
+        </div>
+        <div class="activity-list" id="activity-list">
+          <div class="list-loading">Loading recent activity…</div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="shell footer-inner">
+        <div><strong>Classroom Allotter</strong><span>A coordination MVP built with Express and PostgreSQL.</span></div>
+        <span>Times shown in your device timezone · Campus timetable uses Asia/Kolkata</span>
+      </div>
+    </footer>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>

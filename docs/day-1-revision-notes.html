@@ -234,7 +234,7 @@ curl -i http://localhost:3000/api/rooms/999</pre>
       </tr>
     </table>
   </div>
-  <p>In-memory data is useful for learning API behavior without database complexity. It is not persistent. The next major block will replace it with MongoDB documents so room records survive restarts.</p>
+  <p>In-memory data is useful for learning API behavior without database complexity. It is not persistent. The next major block will replace it with PostgreSQL rows so room records survive restarts.</p>
 
   <h2>11. Tomorrow's recall questions</h2>
   <ol>
@@ -250,9 +250,9 @@ curl -i http://localhost:3000/api/rooms/999</pre>
 
   <h2>12. Interview-ready summary</h2>
   <div class="callout">
-    “I built an Express API with health and room endpoints. The rooms API supports collection retrieval, query filtering, lookup by route parameter, and JSON-based creation. I validate and normalize input, distinguish 400, 404, and 409 errors, and return 201 after creation. The current array is intentionally temporary; MongoDB is the next step for persistence.”
+    “I built an Express API with health and room endpoints. The rooms API supports collection retrieval, query filtering, lookup by route parameter, and JSON-based creation. I validate and normalize input, distinguish 400, 404, and 409 errors, and return 201 after creation. The current array is intentionally temporary; PostgreSQL is the next step for persistence.”
   </div>
 
-  <p class="small">Next session: quick recall, then MongoDB concepts and persistent room storage. Final project delivery will include Vercel deployment.</p>
+  <p class="small">Next session: relational schema design, then PostgreSQL and persistent room storage. Final project delivery will include Vercel deployment with a managed PostgreSQL database.</p>
 </body>
 </html>

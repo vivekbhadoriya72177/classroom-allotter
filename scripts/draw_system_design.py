@@ -41,7 +41,7 @@ def arrow(points, text=None, at=None):
         d.text(at,text,font=small,fill=muted)
 
 d.text((W/2,35),"CLASSROOM ALLOTTER · SYSTEM DESIGN",font=title,fill=ink,anchor="ma")
-d.text((W/2,95),"One Node.js API, feature services, MongoDB, and separate photo storage",font=body,fill=muted,anchor="ma")
+d.text((W/2,95),"One Node.js API, feature services, PostgreSQL, and separate photo storage",font=body,fill=muted,anchor="ma")
 
 box((500,145,1300,260),["PEOPLE","Students · Class Representatives · Timetable Admin"],"#e8f0ff","#8aa8dc")
 box((430,335,1370,485),["WEB BROWSER","Search rooms · Report empty room","Mark activity taken or release it early"],"#eaf7f1","#8bbda4")
@@ -52,8 +52,8 @@ box((645,850,1165,1065),["EMPTY-ROOM REPORTS","Save room, reporter, and time","O
 box((1245,850,1765,1065),["CR ROOM ACTIVITIES","Rescheduled · Extra · Other","Record start and end time","Allow early release"],"#eef4fc","#a9bed8")
 
 box((55,1160,440,1300),["EXPIRY JOB","Clear stale reports","Close ended activities"],"#fcecee","#d998a1")
-box((520,1160,1280,1300),["MONGODB","rooms · timetableEntries · emptyReports","roomActivities · users"],"#e8f7ee","#8bbda4")
-box((1360,1160,1755,1300),["IMAGE STORAGE","Photo files stored separately","MongoDB stores file reference"],"#f2ecff","#ad97d5")
+box((520,1160,1280,1300),["POSTGRESQL","rooms · timetable_entries · empty_reports","room_activities · users · keys · constraints"],"#e8f7ee","#8bbda4")
+box((1360,1160,1755,1300),["IMAGE STORAGE","Photo files stored separately","PostgreSQL stores file reference"],"#f2ecff","#ad97d5")
 
 arrow([(900,260),(900,335)])
 arrow([(900,485),(900,565)])
