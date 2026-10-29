@@ -92,6 +92,7 @@ Rooms are stored in memory and reset whenever the server restarts.
 - Built 30-minute empty-room observations with optional notes and hosted photo URLs.
 - Built a responsive HTML, CSS, and JavaScript interface for search, booking, reporting, dashboard metrics, and activity history.
 - Refactored the original single-page interface into four focused routes: room search, booking, empty-room reporting, and activity history. Search results preserve the selected room and interval when opening the booking page.
+- Corrected mobile viewport scaling by constraining intrinsic grid/form widths, clipping decorative overflow, using 16px mobile form controls, and retaining user-controlled pinch zoom.
 - Prepared Vercel's zero-configuration Express entry point, static `public/` assets, Singapore compute region, and deployment guide.
 - Expanded the database inspection script to print timetable, report, and activity tables.
 

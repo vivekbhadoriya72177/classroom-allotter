@@ -22,6 +22,7 @@ An observation improves confidence, but it never overrides a timetable entry or 
 - Search rooms by date, full time interval, minimum capacity, building, and facility.
 - Use focused browser pages for room search, booking, reporting, and activity history instead of one overloaded screen.
 - Carry the selected room and interval from a search result directly into the booking page.
+- Keep narrow mobile screens at their natural viewport scale by preventing horizontal layout overflow while preserving browser pinch-to-zoom.
 - Reject a room if any timetable entry or active activity overlaps the requested interval.
 - Show recent empty-room observations separately from verified timetable availability.
 - Record rescheduled lectures, extra classes, study sessions, and other activities.
