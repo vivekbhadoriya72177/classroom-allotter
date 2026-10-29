@@ -4,6 +4,14 @@ The database schema is already applied to the current Neon project. Deployment o
 
 **Current production URL:** [https://classroom-allotter.vercel.app](https://classroom-allotter.vercel.app)
 
+The first production version was deployed successfully with Vercel CLI. Automatic Git deployments are not connected yet because the Vercel GitHub App does not currently have access to the private repository. To enable them:
+
+1. In Vercel, open **Account Settings → Git** and configure the GitHub connection.
+2. In GitHub's Vercel App settings, grant repository access to `classroom-allotter` (or all repositories).
+3. Return to the Vercel project's **Settings → Git** page and connect `vivekbhadoriya72177/classroom-allotter`.
+
+Until that one-time setting is changed, deploy later versions from this folder with `npx vercel@latest --prod`.
+
 ## Recommended: deploy from GitHub
 
 1. Push the completed project to the `main` branch of the GitHub repository.

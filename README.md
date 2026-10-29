@@ -184,6 +184,7 @@ The repository is prepared for Vercel zero-configuration Express deployment:
 Follow [DEPLOYMENT.md](DEPLOYMENT.md) for the exact dashboard and CLI steps plus post-deployment checks.
 
 The production deployment was verified on 2026-10-29 at `https://classroom-allotter.vercel.app`.
+The initial version was deployed through Vercel CLI; `DEPLOYMENT.md` explains the one-time private-repository permission needed for automatic Git deployments.
 
 ## Verification completed
 
