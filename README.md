@@ -20,6 +20,8 @@ An observation improves confidence, but it never overrides a timetable entry or 
 ## Working features
 
 - Search rooms by date, full time interval, minimum capacity, building, and facility.
+- Use focused browser pages for room search, booking, reporting, and activity history instead of one overloaded screen.
+- Carry the selected room and interval from a search result directly into the booking page.
 - Reject a room if any timetable entry or active activity overlaps the requested interval.
 - Show recent empty-room observations separately from verified timetable availability.
 - Record rescheduled lectures, extra classes, study sessions, and other activities.
@@ -98,6 +100,17 @@ Foreign keys, unique constraints, check constraints, indexes, parameterized SQL,
 
 Validation errors return `400`, missing records return `404`, timetable or activity conflicts return `409`, database health failures return `503`, and unexpected server errors return `500`.
 
+## Browser pages
+
+| Page | Purpose |
+|---|---|
+| `/` | Search timetable and booking availability, then choose a room. |
+| `/booking` | Record one room activity with its organizer and exact interval. |
+| `/report` | Submit one fresh empty-room observation. |
+| `/activity` | Review booking history and release an active room early. |
+
+Search-result links send `roomId`, `start`, and `end` as URL parameters so the booking form is prefilled without combining all workflows on one page.
+
 ## Project structure
 
 ```text
@@ -108,8 +121,11 @@ classroom-allotter/
 │   └── seed.sql
 ├── public/
 │   ├── app.js
+│   ├── activity.html
+│   ├── booking.html
 │   ├── favicon.svg
 │   ├── index.html
+│   ├── report.html
 │   └── styles.css
 ├── scripts/
 │   ├── inspect-database.js
@@ -177,6 +193,7 @@ The repository is prepared for Vercel zero-configuration Express deployment:
 
 - `src/server.js` default-exports the Express app for Vercel and only opens a port locally.
 - `public/` contains CDN-served browser assets.
+- Clean URLs expose the focused pages as `/booking`, `/report`, and `/activity` without `.html` suffixes.
 - `vercel.json` places server compute in Singapore (`sin1`), close to the current Neon database.
 - `.vercelignore` explicitly excludes local secrets, Git metadata, dependencies, and learning PDFs from uploads.
 - `DATABASE_URL` is supplied through Vercel environment variables, never source control.

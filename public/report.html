@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Share a fresh observation that a classroom appears empty." />
+    <meta name="theme-color" content="#10231d" />
+    <title>Report an Empty Room — Classroom Allotter</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="/app.js" type="module"></script>
+  </head>
+  <body class="report-page">
+    <div class="page-glow page-glow-one"></div>
+    <header class="site-header shell">
+      <a class="brand" href="/" aria-label="Classroom Allotter home">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 42 42"><path d="M8 11.5 21 5l13 6.5v19L21 37 8 30.5z" /><path d="M14 17h14M14 22h9M14 27h12" /></svg></span>
+        <span>Classroom <strong>Allotter</strong></span>
+      </a>
+      <nav aria-label="Primary navigation">
+        <a href="/">Find rooms</a><a href="/booking">Book</a><a class="active" aria-current="page" href="/report">Report</a><a href="/activity">Activity</a>
+      </nav>
+      <span class="system-status" id="system-status"><span class="status-dot"></span>Checking system</span>
+    </header>
+
+    <main class="flow-page">
+      <section class="flow-hero shell">
+        <a class="back-link" href="/">← Back to room search</a>
+        <p class="eyebrow"><span></span> Observation workflow</p>
+        <h1>See an empty room?<br /><em>Share a fresh signal.</em></h1>
+        <p>An observation helps another student decide quickly, but it stays separate from the official timetable and automatically expires after 30 minutes.</p>
+      </section>
+
+      <section class="flow-layout shell">
+        <form class="action-card report-card flow-form" id="report-form">
+          <div class="action-title">
+            <span class="action-number">01</span>
+            <div><h2>Observation details</h2><p>Report only what you can currently see.</p></div>
+          </div>
+          <div class="form-grid single-column">
+            <label><span>Room</span><select name="roomId" class="room-select" required><option value="">Loading rooms…</option></select></label>
+            <label><span>Your name</span><input name="reporterName" maxlength="100" placeholder="Who observed it?" required /></label>
+            <label><span>Optional note</span><textarea name="note" maxlength="300" rows="4" placeholder="Lights off, no class in progress…"></textarea></label>
+            <label><span>Optional photo URL</span><input name="photoUrl" type="url" placeholder="https://…" /></label>
+          </div>
+          <p class="form-note">Avoid identifiable people in photos. The MVP stores only a hosted URL, not an uploaded image.</p>
+          <button class="action-button light-button" type="submit">Share observation <span>→</span></button>
+          <div class="form-result" id="report-result" aria-live="polite"></div>
+        </form>
+
+        <aside class="flow-guide dark-guide">
+          <span class="guide-kicker">Signal rules</span>
+          <h2>Fresh, useful, and separate</h2>
+          <ol>
+            <li><span>1</span><div><strong>Timestamped now</strong><small>Everyone can judge how recent the observation is.</small></div></li>
+            <li><span>2</span><div><strong>Expires in 30 minutes</strong><small>An old report never looks current.</small></div></li>
+            <li><span>3</span><div><strong>Does not override schedules</strong><small>Timetable and CR bookings remain authoritative.</small></div></li>
+          </ol>
+          <a class="guide-link" href="/">Search current availability →</a>
+        </aside>
+      </section>
+    </main>
+
+    <footer><div class="shell footer-inner"><div><strong>Classroom Allotter</strong><span>A coordination MVP built with Express and PostgreSQL.</span></div><span>Reports expire after 30 minutes</span></div></footer>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>

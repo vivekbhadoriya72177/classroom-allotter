@@ -24,7 +24,7 @@
     <div class="page-glow page-glow-two"></div>
 
     <header class="site-header shell">
-      <a class="brand" href="#top" aria-label="Classroom Allotter home">
+      <a class="brand" href="/" aria-label="Classroom Allotter home">
         <span class="brand-mark" aria-hidden="true">
           <svg viewBox="0 0 42 42" role="img">
             <path d="M8 11.5 21 5l13 6.5v19L21 37 8 30.5z" />
@@ -34,9 +34,10 @@
         <span>Classroom <strong>Allotter</strong></span>
       </a>
       <nav aria-label="Primary navigation">
-        <a href="#find-room">Find a room</a>
-        <a href="#coordinate">Coordinate</a>
-        <a href="#activity">Activity</a>
+        <a class="active" aria-current="page" href="/">Find rooms</a>
+        <a href="/booking">Book</a>
+        <a href="/report">Report</a>
+        <a href="/activity">Activity</a>
       </nav>
       <span class="system-status" id="system-status">
         <span class="status-dot"></span>
@@ -156,70 +157,10 @@
         </div>
       </section>
 
-      <section class="coordinate-section" id="coordinate">
-        <div class="shell">
-          <div class="section-heading light-heading">
-            <div>
-              <p class="eyebrow"><span></span> Community coordination</p>
-              <h2>Keep the signal accurate</h2>
-            </div>
-            <p>Reserve a room for an activity or report what you can see right now.</p>
-          </div>
-
-          <div class="action-grid">
-            <form class="action-card" id="booking-form">
-              <div class="action-title">
-                <span class="action-number">01</span>
-                <div><h3>Record an activity</h3><p>For CRs coordinating an extra or shifted class.</p></div>
-              </div>
-              <div class="form-grid">
-                <label class="wide"><span>Room</span><select name="roomId" class="room-select" required></select></label>
-                <label><span>Activity</span>
-                  <select name="activityType" required>
-                    <option value="rescheduled-lecture">Rescheduled lecture</option>
-                    <option value="extra-class">Extra class</option>
-                    <option value="study-session">Study session</option>
-                    <option value="other">Other</option>
-                  </select>
-                </label>
-                <label><span>Organizer</span><input name="organizerName" maxlength="100" placeholder="Your name" required /></label>
-                <label class="wide"><span>Title</span><input name="title" maxlength="120" placeholder="e.g. DBMS doubt session" required /></label>
-                <label><span>Starts</span><input name="start" type="datetime-local" required /></label>
-                <label><span>Ends</span><input name="end" type="datetime-local" required /></label>
-              </div>
-              <p class="form-note">The server rechecks timetable and activity conflicts before saving.</p>
-              <button class="action-button" type="submit">Reserve interval <span>→</span></button>
-            </form>
-
-            <form class="action-card report-card" id="report-form">
-              <div class="action-title">
-                <span class="action-number">02</span>
-                <div><h3>Report an empty room</h3><p>A fresh observation helps others decide with confidence.</p></div>
-              </div>
-              <div class="form-grid single-column">
-                <label><span>Room</span><select name="roomId" class="room-select" required></select></label>
-                <label><span>Your name</span><input name="reporterName" maxlength="100" placeholder="Who observed it?" required /></label>
-                <label><span>Optional note</span><textarea name="note" maxlength="300" rows="3" placeholder="Lights off, no class in progress…"></textarea></label>
-                <label><span>Optional photo URL</span><input name="photoUrl" type="url" placeholder="https://…" /></label>
-              </div>
-              <p class="form-note">Reports expire after 30 minutes and never overwrite the timetable.</p>
-              <button class="action-button light-button" type="submit">Share observation <span>→</span></button>
-            </form>
-          </div>
-        </div>
-      </section>
-
-      <section class="activity-section shell" id="activity">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow"><span></span> Activity history</p>
-            <h2>What the campus coordinated</h2>
-          </div>
-          <button class="text-button" id="refresh-activity" type="button">Refresh ↻</button>
-        </div>
-        <div class="activity-list" id="activity-list">
-          <div class="list-loading">Loading recent activity…</div>
-        </div>
+      <section class="portal-links shell" aria-label="Other classroom workflows">
+        <a href="/booking"><span>01</span><div><strong>Book a room</strong><small>Reserve a verified interval</small></div><i>→</i></a>
+        <a href="/report"><span>02</span><div><strong>Report an empty room</strong><small>Share a fresh observation</small></div><i>→</i></a>
+        <a href="/activity"><span>03</span><div><strong>View activity</strong><small>Review or release bookings</small></div><i>→</i></a>
       </section>
     </main>
 

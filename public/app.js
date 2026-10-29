@@ -12,7 +12,9 @@ const elements = {
   resultsWindow: document.querySelector("#results-window"),
   roomResults: document.querySelector("#room-results"),
   bookingForm: document.querySelector("#booking-form"),
+  bookingResult: document.querySelector("#booking-result"),
   reportForm: document.querySelector("#report-form"),
+  reportResult: document.querySelector("#report-result"),
   activityList: document.querySelector("#activity-list"),
   refreshActivity: document.querySelector("#refresh-activity"),
   toast: document.querySelector("#toast"),
@@ -53,23 +55,35 @@ function roundToNextHalfHour(date) {
   return rounded;
 }
 
-function setDefaultTimes() {
-  let start = roundToNextHalfHour(new Date());
+function defaultInterval() {
+  const start = roundToNextHalfHour(new Date());
 
   if (start.getHours() >= 20 || start.getHours() < 7) {
     start.setDate(start.getDate() + (start.getHours() >= 20 ? 1 : 0));
     start.setHours(9, 0, 0, 0);
   }
 
-  const end = new Date(start.getTime() + 60 * 60 * 1000);
-  elements.searchDate.value = dateInputValue(start);
-  elements.searchStart.value = timeInputValue(start);
-  elements.searchEnd.value = timeInputValue(end);
-  elements.bookingForm.elements.start.value = dateTimeInputValue(start);
-  elements.bookingForm.elements.end.value = dateTimeInputValue(end);
+  return { start, end: new Date(start.getTime() + 60 * 60 * 1000) };
+}
+
+function setDefaultTimes() {
+  const { start, end } = defaultInterval();
+
+  if (elements.searchForm) {
+    elements.searchDate.value = dateInputValue(start);
+    elements.searchStart.value = timeInputValue(start);
+    elements.searchEnd.value = timeInputValue(end);
+  }
+
+  if (elements.bookingForm) {
+    elements.bookingForm.elements.start.value = dateTimeInputValue(start);
+    elements.bookingForm.elements.end.value = dateTimeInputValue(end);
+  }
 }
 
 function showToast(message, type = "success") {
+  if (!elements.toast) return;
+
   clearTimeout(toastTimer);
   elements.toast.textContent = message;
   elements.toast.className = `toast visible ${type === "error" ? "error" : ""}`;
@@ -110,23 +124,28 @@ function relativeMinutes(value) {
 
 function intervalFromSearchForm() {
   const date = elements.searchDate.value;
-  const start = new Date(`${date}T${elements.searchStart.value}:00`);
-  const end = new Date(`${date}T${elements.searchEnd.value}:00`);
-  return { start, end };
+  return {
+    start: new Date(`${date}T${elements.searchStart.value}:00`),
+    end: new Date(`${date}T${elements.searchEnd.value}:00`),
+  };
 }
 
 async function checkHealth() {
+  if (!elements.systemStatus) return;
+
   try {
     await fetchJson("/api/health");
     elements.systemStatus.className = "system-status online";
-    elements.systemStatus.lastChild.textContent = " System online";
+    elements.systemStatus.innerHTML = '<span class="status-dot"></span>System online';
   } catch {
     elements.systemStatus.className = "system-status offline";
-    elements.systemStatus.lastChild.textContent = " System unavailable";
+    elements.systemStatus.innerHTML = '<span class="status-dot"></span>System unavailable';
   }
 }
 
 async function loadOverview() {
+  if (!elements.totalRooms) return;
+
   try {
     const { overview } = await fetchJson("/api/overview");
     elements.totalRooms.textContent = overview.total_rooms;
@@ -137,7 +156,35 @@ async function loadOverview() {
   }
 }
 
+function applyPageSelection() {
+  const params = new URLSearchParams(window.location.search);
+  const roomId = params.get("roomId");
+
+  document.querySelectorAll(".room-select").forEach((select) => {
+    if (roomId && rooms.some((room) => String(room.id) === roomId)) {
+      select.value = roomId;
+    }
+  });
+
+  if (elements.bookingForm) {
+    const startValue = params.get("start");
+    const endValue = params.get("end");
+    const start = startValue ? new Date(startValue) : null;
+    const end = endValue ? new Date(endValue) : null;
+
+    if (start && !Number.isNaN(start.getTime())) {
+      elements.bookingForm.elements.start.value = dateTimeInputValue(start);
+    }
+
+    if (end && !Number.isNaN(end.getTime())) {
+      elements.bookingForm.elements.end.value = dateTimeInputValue(end);
+    }
+  }
+}
+
 async function loadRooms() {
+  if (!document.querySelector(".room-select") && !elements.buildingFilter) return;
+
   const data = await fetchJson("/api/rooms");
   rooms = data.rooms;
   const roomOptions = rooms
@@ -145,16 +192,18 @@ async function loadRooms() {
     .join("");
 
   document.querySelectorAll(".room-select").forEach((select) => {
-    const selectedValue = select.value;
     select.innerHTML = roomOptions;
-    if (selectedValue) select.value = selectedValue;
   });
 
-  const buildings = [...new Set(rooms.map((room) => room.building))].sort();
-  elements.buildingFilter.insertAdjacentHTML(
-    "beforeend",
-    buildings.map((building) => `<option value="${escapeHtml(building)}">${escapeHtml(building)}</option>`).join(""),
-  );
+  if (elements.buildingFilter) {
+    const buildings = [...new Set(rooms.map((room) => room.building))].sort();
+    elements.buildingFilter.insertAdjacentHTML(
+      "beforeend",
+      buildings.map((building) => `<option value="${escapeHtml(building)}">${escapeHtml(building)}</option>`).join(""),
+    );
+  }
+
+  applyPageSelection();
 }
 
 function renderRooms(data) {
@@ -172,36 +221,41 @@ function renderRooms(data) {
     return;
   }
 
-  elements.roomResults.innerHTML = data.rooms
-    .map((room) => {
-      const facilities = room.facilities.length
-        ? room.facilities.map((facility) => `<span>${escapeHtml(facility)}</span>`).join("")
-        : "<span>standard room</span>";
-      const report = room.recentEmptyReport
-        ? `<div class="report-signal">Reported empty ${relativeMinutes(room.recentEmptyReport.observedAt)} by ${escapeHtml(room.recentEmptyReport.reporterName)}</div>`
-        : "";
+  elements.roomResults.innerHTML = data.rooms.map((room) => {
+    const facilities = room.facilities.length
+      ? room.facilities.map((facility) => `<span>${escapeHtml(facility)}</span>`).join("")
+      : "<span>standard room</span>";
+    const report = room.recentEmptyReport
+      ? `<div class="report-signal">Reported empty ${relativeMinutes(room.recentEmptyReport.observedAt)} by ${escapeHtml(room.recentEmptyReport.reporterName)}</div>`
+      : "";
+    const bookingParams = new URLSearchParams({
+      roomId: room.id,
+      start: data.interval.start,
+      end: data.interval.end,
+    });
 
-      return `
-        <article class="room-card">
-          <div class="room-card-top">
-            <div><h3>${escapeHtml(room.code)}</h3><p class="room-building">${escapeHtml(room.building)}</p></div>
-            <span class="capacity-badge">${room.capacity} seats</span>
-          </div>
-          <div class="verified-row"><i>✓</i> Timetable and bookings are clear</div>
-          <div class="facility-list">${facilities}</div>
-          ${report}
-          <div class="room-card-actions">
-            <small>Full interval verified</small>
-            <button class="book-room" type="button" data-room-id="${room.id}">Use this room</button>
-          </div>
-        </article>
-      `;
-    })
-    .join("");
+    return `
+      <article class="room-card">
+        <div class="room-card-top">
+          <div><h3>${escapeHtml(room.code)}</h3><p class="room-building">${escapeHtml(room.building)}</p></div>
+          <span class="capacity-badge">${room.capacity} seats</span>
+        </div>
+        <div class="verified-row"><i>✓</i> Timetable and bookings are clear</div>
+        <div class="facility-list">${facilities}</div>
+        ${report}
+        <div class="room-card-actions">
+          <a class="report-room-link" href="/report?roomId=${room.id}">Report empty</a>
+          <a class="book-room" href="/booking?${bookingParams}">Book room →</a>
+        </div>
+      </article>
+    `;
+  }).join("");
 }
 
 async function searchRooms(event) {
   event?.preventDefault();
+  if (!elements.searchForm) return;
+
   const button = elements.searchForm.querySelector("button");
   const formData = new FormData(elements.searchForm);
   const { start, end } = intervalFromSearchForm();
@@ -224,8 +278,7 @@ async function searchRooms(event) {
   button.firstElementChild.textContent = "Checking timetable…";
 
   try {
-    const data = await fetchJson(`/api/availability?${params}`);
-    renderRooms(data);
+    renderRooms(await fetchJson(`/api/availability?${params}`));
   } catch (error) {
     showToast(error.message, "error");
   } finally {
@@ -244,8 +297,10 @@ function activityTypeLabel(value) {
 }
 
 async function loadActivities() {
+  if (!elements.activityList) return;
+
   try {
-    const data = await fetchJson("/api/activities?limit=10");
+    const data = await fetchJson("/api/activities?limit=20");
 
     if (!data.activities.length) {
       elements.activityList.innerHTML = '<div class="list-loading">No activity has been recorded yet.</div>';
@@ -275,26 +330,33 @@ async function submitBooking(event) {
   const form = event.currentTarget;
   const button = form.querySelector("button");
   const data = Object.fromEntries(new FormData(form));
-  const payload = {
-    roomId: Number(data.roomId),
-    activityType: data.activityType,
-    title: data.title,
-    organizerName: data.organizerName,
-    start: new Date(data.start).toISOString(),
-    end: new Date(data.end).toISOString(),
-  };
+  const start = new Date(data.start);
+  const end = new Date(data.end);
+
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    showToast("Choose a valid start and end time.", "error");
+    return;
+  }
 
   button.disabled = true;
+  elements.bookingResult.innerHTML = "";
 
   try {
     const result = await fetchJson("/api/activities", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        roomId: Number(data.roomId),
+        activityType: data.activityType,
+        title: data.title,
+        organizerName: data.organizerName,
+        start: start.toISOString(),
+        end: end.toISOString(),
+      }),
     });
-    showToast(`${result.activity.room_code} reserved successfully.`);
+    elements.bookingResult.innerHTML = `<strong>${escapeHtml(result.activity.room_code)} is reserved.</strong><span>The booking is now visible in <a href="/activity">activity history</a>.</span>`;
     form.elements.title.value = "";
-    await Promise.all([loadActivities(), loadOverview(), searchRooms()]);
+    showToast(`${result.activity.room_code} reserved successfully.`);
   } catch (error) {
     showToast(error.message, "error");
   } finally {
@@ -307,25 +369,24 @@ async function submitReport(event) {
   const form = event.currentTarget;
   const button = form.querySelector("button");
   const data = Object.fromEntries(new FormData(form));
-  const payload = {
-    roomId: Number(data.roomId),
-    reporterName: data.reporterName,
-    note: data.note,
-    photoUrl: data.photoUrl,
-  };
-
   button.disabled = true;
+  elements.reportResult.innerHTML = "";
 
   try {
     const result = await fetchJson("/api/reports", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        roomId: Number(data.roomId),
+        reporterName: data.reporterName,
+        note: data.note,
+        photoUrl: data.photoUrl,
+      }),
     });
-    showToast(`Fresh observation shared for ${result.report.room_code}.`);
+    elements.reportResult.innerHTML = `<strong>Observation shared for ${escapeHtml(result.report.room_code)}.</strong><span>It will remain fresh for 30 minutes. <a href="/">Return to search</a>.</span>`;
     form.elements.note.value = "";
     form.elements.photoUrl.value = "";
-    await Promise.all([loadOverview(), searchRooms()]);
+    showToast(`Fresh observation shared for ${result.report.room_code}.`);
   } catch (error) {
     showToast(error.message, "error");
   } finally {
@@ -333,23 +394,14 @@ async function submitReport(event) {
   }
 }
 
-elements.searchForm.addEventListener("submit", searchRooms);
-elements.bookingForm.addEventListener("submit", submitBooking);
-elements.reportForm.addEventListener("submit", submitReport);
-elements.refreshActivity.addEventListener("click", loadActivities);
+setDefaultTimes();
 
-elements.roomResults.addEventListener("click", (event) => {
-  const button = event.target.closest(".book-room");
-  if (!button) return;
+elements.searchForm?.addEventListener("submit", searchRooms);
+elements.bookingForm?.addEventListener("submit", submitBooking);
+elements.reportForm?.addEventListener("submit", submitReport);
+elements.refreshActivity?.addEventListener("click", loadActivities);
 
-  const { start, end } = intervalFromSearchForm();
-  elements.bookingForm.elements.roomId.value = button.dataset.roomId;
-  elements.bookingForm.elements.start.value = dateTimeInputValue(start);
-  elements.bookingForm.elements.end.value = dateTimeInputValue(end);
-  elements.bookingForm.scrollIntoView({ behavior: "smooth", block: "center" });
-});
-
-elements.activityList.addEventListener("click", async (event) => {
+elements.activityList?.addEventListener("click", async (event) => {
   const button = event.target.closest(".release-button");
   if (!button) return;
 
@@ -358,15 +410,25 @@ elements.activityList.addEventListener("click", async (event) => {
   try {
     await fetchJson(`/api/activities/${button.dataset.activityId}/release`, { method: "PATCH" });
     showToast("The room was released early.");
-    await Promise.all([loadActivities(), loadOverview(), searchRooms()]);
+    await loadActivities();
   } catch (error) {
     showToast(error.message, "error");
     button.disabled = false;
   }
 });
 
-setDefaultTimes();
+async function initializePage() {
+  const tasks = [checkHealth(), loadOverview(), loadActivities()];
 
-Promise.all([checkHealth(), loadOverview(), loadRooms(), loadActivities()])
-  .then(() => searchRooms())
-  .catch((error) => showToast(error.message, "error"));
+  if (document.querySelector(".room-select") || elements.buildingFilter) {
+    tasks.push(loadRooms());
+  }
+
+  await Promise.all(tasks);
+
+  if (elements.searchForm) {
+    await searchRooms();
+  }
+}
+
+initializePage().catch((error) => showToast(error.message, "error"));

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Reserve a classroom for a rescheduled lecture, extra class, or study session." />
+    <meta name="theme-color" content="#10231d" />
+    <title>Book a Room — Classroom Allotter</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="/app.js" type="module"></script>
+  </head>
+  <body>
+    <div class="page-glow page-glow-one"></div>
+    <header class="site-header shell">
+      <a class="brand" href="/" aria-label="Classroom Allotter home">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 42 42"><path d="M8 11.5 21 5l13 6.5v19L21 37 8 30.5z" /><path d="M14 17h14M14 22h9M14 27h12" /></svg></span>
+        <span>Classroom <strong>Allotter</strong></span>
+      </a>
+      <nav aria-label="Primary navigation">
+        <a href="/">Find rooms</a><a class="active" aria-current="page" href="/booking">Book</a><a href="/report">Report</a><a href="/activity">Activity</a>
+      </nav>
+      <span class="system-status" id="system-status"><span class="status-dot"></span>Checking system</span>
+    </header>
+
+    <main class="flow-page">
+      <section class="flow-hero shell">
+        <a class="back-link" href="/">← Back to room search</a>
+        <p class="eyebrow"><span></span> Booking workflow</p>
+        <h1>Reserve the room.<br /><em>Protect the interval.</em></h1>
+        <p>Record an academic activity only after selecting a room and exact time. The server checks the timetable and every active booking again before it commits.</p>
+      </section>
+
+      <section class="flow-layout shell">
+        <form class="action-card flow-form" id="booking-form">
+          <div class="action-title">
+            <span class="action-number">01</span>
+            <div><h2>Activity details</h2><p>All fields are required so other CRs can understand the reservation.</p></div>
+          </div>
+          <div class="form-grid">
+            <label class="wide"><span>Room</span><select name="roomId" class="room-select" required><option value="">Loading rooms…</option></select></label>
+            <label><span>Activity</span>
+              <select name="activityType" required>
+                <option value="rescheduled-lecture">Rescheduled lecture</option>
+                <option value="extra-class">Extra class</option>
+                <option value="study-session">Study session</option>
+                <option value="other">Other</option>
+              </select>
+            </label>
+            <label><span>Organizer</span><input name="organizerName" maxlength="100" placeholder="Your name" required /></label>
+            <label class="wide"><span>Title</span><input name="title" maxlength="120" placeholder="e.g. DBMS doubt session" required /></label>
+            <label><span>Starts</span><input name="start" type="datetime-local" required /></label>
+            <label><span>Ends</span><input name="end" type="datetime-local" required /></label>
+          </div>
+          <p class="form-note">A room-row lock makes the conflict check and insert one safe transaction.</p>
+          <button class="action-button" type="submit">Check and reserve <span>→</span></button>
+          <div class="form-result" id="booking-result" aria-live="polite"></div>
+        </form>
+
+        <aside class="flow-guide">
+          <span class="guide-kicker">Before you submit</span>
+          <h2>What the system verifies</h2>
+          <ol>
+            <li><span>1</span><div><strong>The room exists</strong><small>The selected ID must match a current room.</small></div></li>
+            <li><span>2</span><div><strong>The timetable is clear</strong><small>No regular class may overlap any part of the interval.</small></div></li>
+            <li><span>3</span><div><strong>No CR booking overlaps</strong><small>Concurrent requests cannot double-book the room.</small></div></li>
+          </ol>
+          <a class="guide-link" href="/activity">View booking history →</a>
+        </aside>
+      </section>
+    </main>
+
+    <footer><div class="shell footer-inner"><div><strong>Classroom Allotter</strong><span>A coordination MVP built with Express and PostgreSQL.</span></div><span>Campus timetable uses Asia/Kolkata</span></div></footer>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>

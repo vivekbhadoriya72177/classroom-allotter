@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Review classroom booking history and release active reservations." />
+    <meta name="theme-color" content="#10231d" />
+    <title>Activity History — Classroom Allotter</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="/app.js" type="module"></script>
+  </head>
+  <body>
+    <div class="page-glow page-glow-two"></div>
+    <header class="site-header shell">
+      <a class="brand" href="/" aria-label="Classroom Allotter home">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 42 42"><path d="M8 11.5 21 5l13 6.5v19L21 37 8 30.5z" /><path d="M14 17h14M14 22h9M14 27h12" /></svg></span>
+        <span>Classroom <strong>Allotter</strong></span>
+      </a>
+      <nav aria-label="Primary navigation">
+        <a href="/">Find rooms</a><a href="/booking">Book</a><a href="/report">Report</a><a class="active" aria-current="page" href="/activity">Activity</a>
+      </nav>
+      <span class="system-status" id="system-status"><span class="status-dot"></span>Checking system</span>
+    </header>
+
+    <main class="flow-page">
+      <section class="flow-hero compact-flow-hero shell">
+        <a class="back-link" href="/">← Back to room search</a>
+        <p class="eyebrow"><span></span> Coordination record</p>
+        <h1>Room activity.<br /><em>Clear and accountable.</em></h1>
+        <p>Review recent reservations, their organizers and intervals, or release an active room early when the activity finishes.</p>
+      </section>
+
+      <section class="activity-section standalone-activity shell">
+        <div class="section-heading">
+          <div><h2>Recent bookings</h2><p class="activity-explainer">Completed and released records remain visible as history.</p></div>
+          <div class="heading-actions"><a class="text-button" href="/booking">New booking +</a><button class="text-button" id="refresh-activity" type="button">Refresh ↻</button></div>
+        </div>
+        <div class="activity-list" id="activity-list"><div class="list-loading">Loading recent activity…</div></div>
+      </section>
+    </main>
+
+    <footer><div class="shell footer-inner"><div><strong>Classroom Allotter</strong><span>A coordination MVP built with Express and PostgreSQL.</span></div><span>Active bookings can be released early</span></div></footer>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>

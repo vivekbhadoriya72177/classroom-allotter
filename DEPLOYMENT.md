@@ -60,12 +60,12 @@ Expected response:
 
 Then verify these browser flows:
 
-1. Open the root URL and confirm the dashboard totals load.
-2. Search for a room with a future same-day interval.
-3. Submit a fresh empty-room observation and confirm it appears on that room card.
-4. Record a future activity in an available room.
-5. Submit the same interval again and confirm the conflict message appears.
-6. Release the activity from the history list.
+1. Open `/` and confirm the dashboard totals and availability search load.
+2. Search for a room with a future same-day interval and follow **Book room** to `/booking`.
+3. Confirm the booking page prefills the selected room and interval.
+4. Open `/report`, submit a fresh empty-room observation, and confirm it appears in a new search.
+5. Record a future activity on `/booking`, then submit the same interval again and confirm the conflict message appears.
+6. Open `/activity` and release the activity from the history list.
 
 ## How future deployments work
 

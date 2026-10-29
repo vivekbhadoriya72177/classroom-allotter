@@ -14,7 +14,7 @@ const publicDirectory = path.join(currentDirectory, "..", "public");
 
 app.disable("x-powered-by");
 app.use(express.json({ limit: "100kb" }));
-app.use(express.static(publicDirectory));
+app.use(express.static(publicDirectory, { extensions: ["html"] }));
 
 app.use((_request, response, next) => {
   response.setHeader("X-Content-Type-Options", "nosniff");
